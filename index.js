@@ -200,16 +200,14 @@ app.get('/pay', (req, res) => {
   res.send(html);
 });
 
-/**
- * Kina posts the result here.
- * For now we just log it and show a basic message.
- */
-app.post('/kina/backref', (req, res) => {
-  console.log('BACKREF received from Kina:', req.body);
+// Single handler function for backref (works for GET and POST, single or double slash)
+function handleBackref(req, res) {
+  const data = Object.keys(req.body).length ? req.body : req.query;
+  console.log('BACKREF received from Kina:', data);
 
-  const action = req.body.ACTION;
-  const rc = req.body.RC;
-  const order = req.body.ORDER;
+  const action = data.ACTION;
+  const rc = data.RC;
+  const order = data.ORDER || 'UNKNOWN';
 
   let message;
   if (action === '0' && rc === '00') {
@@ -228,11 +226,15 @@ app.post('/kina/backref', (req, res) => {
 </body>
 </html>`;
   res.send(html);
-});
+}
+
+// Accept both /kina/backref and //kina/backref, and both GET + POST
+app.all(['/kina/backref', '//kina/backref'], handleBackref);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log('Kina payments backend listening on port', PORT);
 });
+
 
 
