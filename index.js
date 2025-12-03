@@ -19,7 +19,7 @@ const CONFIG = {
   // TEST secret key from Kina doc:
   secretHex: 'debdd135e436905c7a02f20c56c83a4c501adf555457f0df',
   // while testing locally, backref is your own machine:
-  backrefBase: 'https://kina-bank.onrender.com//kina/backref',
+  backrefBase: 'https://kina-bank.onrender.com/kina/backref',
 };
 
 const TEST_GATEWAY_URL = 'https://test-ipg.kinabank.com.pg/cgi-bin/cgi_link';
@@ -234,4 +234,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log('Kina payments backend listening on port', PORT);
 });
+
 
