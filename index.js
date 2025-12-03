@@ -200,7 +200,11 @@ app.get('/pay', (req, res) => {
   res.send(html);
 });
 
-// Single handler function for backref (works for GET and POST, single or double slash)
+// Redirect URLs for Wix pages
+const WIX_SUCCESS_URL = 'https://www.colygoweh.com/payment-success';
+const WIX_FAILED_URL  = 'https://www.colygoweh.com/payment-failed';
+
+// Unified backref handler for GET & POST, single or double slash
 function handleBackref(req, res) {
   const data = Object.keys(req.body).length ? req.body : req.query;
   console.log('BACKREF received from Kina:', data);
@@ -209,32 +213,24 @@ function handleBackref(req, res) {
   const rc = data.RC;
   const order = data.ORDER || 'UNKNOWN';
 
-  let message;
-  if (action === '0' && rc === '00') {
-    message = `Payment for order ${order} was successful.`;
-  } else {
-    message = `Payment for order ${order} failed or was declined. (ACTION=${action}, RC=${rc})`;
-  }
+  // In TEST environment, RC=00 means approved
+  const isSuccess = rc === '00';
 
-  const html = `
-<!doctype html>
-<html>
-<head><meta charset="utf-8"><title>Payment Result</title></head>
-<body>
-  <h1>${message}</h1>
-  <p>You can now close this window or return to the Colygoweh site.</p>
-</body>
-</html>`;
-  res.send(html);
+  if (isSuccess) {
+    res.redirect(`${WIX_SUCCESS_URL}?order=${encodeURIComponent(order)}`);
+  } else {
+    res.redirect(`${WIX_FAILED_URL}?order=${encodeURIComponent(order)}`);
+  }
 }
 
-// Accept both /kina/backref and //kina/backref, and both GET + POST
+// Accept /kina/backref and //kina/backref, GET + POST
 app.all(['/kina/backref', '//kina/backref'], handleBackref);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log('Kina payments backend listening on port', PORT);
 });
+
 
 
 
